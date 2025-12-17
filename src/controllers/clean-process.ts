@@ -1,0 +1,155 @@
+import { AttributeValue } from "@aws-sdk/client-dynamodb";
+import { DynamoInventoryTracking, DynamoOrders, IDynamoRepository, LowDb } from "../data-sources";
+import { awaiter, ProgressBar } from "../services";
+
+export default class HopOrdersTable {
+  private dynamoClient: IDynamoRepository;
+
+  private lowDB: LowDb;
+
+  private lowDBPath = 'hopOrders';
+
+  private lastDeleteDate: Date;
+
+  private lastStore: string;
+
+  private lastStoreIndex: number;
+
+  private records: Record<string, AttributeValue>[] = [];
+
+  private progressBar: ProgressBar;
+
+  private async getRecordsFromDate() {
+    try {
+      const date = this.lastDeleteDate.toISOString().split('T')[0]
+      this.records = await this.dynamoClient.getRecords(date);
+      if (this.records.length < 1) {
+        console.log('\n');
+        console.log('No hay registros para la fecha: ', this.lastDeleteDate);
+        await this.subtractDay();
+        await this.getRecordsFromDate();
+      }
+    } catch (error) {
+      console.error('Error al obtener registros:', error);
+      throw error;
+    }
+  }
+
+  private async getRecordsFromStore() {
+    this.records = await this.dynamoClient.getRecords(this.lastStore);
+    if (this.records.length < 1) {
+      console.log('\n');
+      console.log('No hay registros para la tienda: ', this.lastStore, 'index: ', this.lastStoreIndex);
+      await this.setLastStore(this.lastStoreIndex + 1);
+      await this.getLastStore();
+      await this.getRecordsFromStore();
+    }
+  }
+
+  private async deleteRecord(pk: string, sk: string, retries = 0) {
+    try {
+      await this.dynamoClient.deleteRecord(pk, sk);
+    } catch (error) {
+      if (retries < Infinity) {
+        await awaiter(20 * 1000 * retries);
+        await this.deleteRecord(pk, sk, retries + 1);
+      } else {
+        console.error('Error al eliminar el registro:', error);
+        throw error;
+      }
+    }
+  }
+
+  private async deleteRecords() {
+    console.log('\n');
+    if (this.lastDeleteDate) {
+      console.log('Borrando registros para la fecha: ', this.lastDeleteDate);
+    }
+    if (this.lastStore) {
+      console.log('Borrando registros anteriores a la fecha 2024-31-12 para la tienda: ', this.lastStore);
+    }
+    console.log('Registros por eliminar: ', this.records.length);
+    this.progressBar = new ProgressBar(this.records.length);
+    let x = 0;
+    while (this.records.length > 0) {
+      const record = this.records.shift()!;
+      await this.deleteRecord(record.pk.S!, record.sk.S!);
+      x += 1;
+      this.progressBar.update(x);
+    }
+  }
+
+  private async getLastDeleteDate(): Promise<void> {
+    this.lastDeleteDate = await this.lowDB.getlastDeleteDate(this.lowDBPath);
+  }
+
+  private async getLastStore(): Promise<void> {
+    const response = await this.lowDB.getLastStoreIndex(this.lowDBPath);
+    this.lastStore = response.store;
+    this.lastStoreIndex = response.index;
+  }
+
+
+  private async subtractDay() {
+    this.lastDeleteDate.setDate(this.lastDeleteDate.getDate() - 1);
+    if(this.lastDeleteDate < new Date('2021-01-01')) {
+      console.log('No hay registros para eliminar fecha: ', this.lastDeleteDate);
+      process.exit(0);
+    }
+    await this.lowDB.setLastDeleteDate(this.lowDBPath, this.lastDeleteDate);
+  }
+
+  private async setLastStore(index: number) {
+    await this.lowDB.setLastStore(this.lowDBPath, index);
+  }
+
+  async deleteOrders() {
+    this.dynamoClient = new DynamoOrders();
+    this.lowDBPath = 'orders';
+    this.lowDB = new LowDb();
+    try {
+      if (!this.lastDeleteDate) {
+        await this.getLastDeleteDate();
+      }
+
+      if (this.records.length < 1) {
+        await this.getRecordsFromDate();
+      }
+
+      await this.deleteRecords();
+
+      if (this.records.length < 1) {
+        await this.deleteOrders();
+      }
+
+    } catch (error) {
+      console.error('Error process:', error);
+      throw error;
+    }
+  }
+
+  async deleteInventoryTracking() {
+    this.dynamoClient = new DynamoInventoryTracking();
+    this.lowDBPath = 'inventoryTracking';
+    this.lowDB = new LowDb();
+    try {
+      if (!this.lastStore) {
+        await this.getLastStore();
+      }
+
+      if (this.records.length < 1) {
+        await this.getRecordsFromStore();
+      }
+
+      await this.deleteRecords();
+
+      if (this.records.length < 1) {
+        await this.deleteInventoryTracking();
+      }
+
+    } catch (error) {
+      console.error('Error process:', error);
+      throw error;
+    }
+  }
+}
