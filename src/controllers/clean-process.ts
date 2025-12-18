@@ -62,20 +62,35 @@ export default class HopOrdersTable {
 
   private async deleteRecords() {
     console.log('\n');
+
     if (this.lastDeleteDate) {
       console.log('Borrando registros para la fecha: ', this.lastDeleteDate);
     }
     if (this.lastStore) {
       console.log('Borrando registros anteriores a la fecha 2024-31-12 para la tienda: ', this.lastStore);
     }
+
     console.log('Registros por eliminar: ', this.records.length);
     this.progressBar = new ProgressBar(this.records.length);
+
     let x = 0;
+    const batchSize = 50; // cantidad por segundo
+
     while (this.records.length > 0) {
-      const record = this.records.shift()!;
-      await this.deleteRecord(record.pk.S!, record.sk.S!);
-      x += 1;
+      // Tomar un lote de hasta 50 registros
+      const batch = this.records.splice(0, batchSize);
+
+      // Procesar el lote en paralelo
+      await Promise.all(
+        batch.map(record => this.deleteRecord(record.pk.S!, record.sk.S!))
+      );
+
+      // Actualizar progreso
+      x += batch.length;
       this.progressBar.update(x);
+
+      // Esperar 1 segundo antes del siguiente lote
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
@@ -92,7 +107,7 @@ export default class HopOrdersTable {
 
   private async subtractDay() {
     this.lastDeleteDate.setDate(this.lastDeleteDate.getDate() - 1);
-    if(this.lastDeleteDate < new Date('2021-01-01')) {
+    if (this.lastDeleteDate < new Date('2021-01-01')) {
       console.log('No hay registros para eliminar fecha: ', this.lastDeleteDate);
       process.exit(0);
     }
