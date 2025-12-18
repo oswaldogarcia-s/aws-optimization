@@ -46,20 +46,6 @@ export default class HopOrdersTable {
     }
   }
 
-  private async deleteRecord(pk: string, sk: string, retries = 0) {
-    try {
-      await this.dynamoClient.deleteRecord(pk, sk);
-    } catch (error) {
-      if (retries < Infinity) {
-        await awaiter(20 * 1000 * retries);
-        await this.deleteRecord(pk, sk, retries + 1);
-      } else {
-        console.error('Error al eliminar el registro:', error);
-        throw error;
-      }
-    }
-  }
-
   private async deleteRecords() {
     console.log('\n');
 
@@ -74,18 +60,28 @@ export default class HopOrdersTable {
     this.progressBar = new ProgressBar(this.records.length);
 
     let x = 0;
-    const batchSize = 50; // cantidad por segundo
+    const batchSize = 20 * 25; // cantidad por segundo
 
     while (this.records.length > 0) {
       // Tomar un lote de hasta 50 registros
       const batch = this.records.splice(0, batchSize);
 
-      // Procesar el lote en paralelo
-      await Promise.all(
-        batch.map(record => this.deleteRecord(record.pk.S!, record.sk.S!))
-      );
+      const promises = [];
+      // Dividir el lote grande en sublotes de máximo 25
+      for (let i = 0; i < batch.length; i += 25) {
+        const subBatch = batch.slice(i, i + 25).map(record => ({
+          pk: record.pk.S!,
+          sk: record.sk.S!
+        }));
 
-      // Actualizar progreso
+        // Llamar a deleteRecord con el arreglo de 25 items
+        const promise = this.dynamoClient.deleteRecords(subBatch);
+        promises.push(promise);
+
+      }
+
+      await Promise.all(promises);
+
       x += batch.length;
       this.progressBar.update(x);
 

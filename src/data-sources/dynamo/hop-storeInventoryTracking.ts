@@ -1,5 +1,5 @@
 /* eslint-disable prefer-arrow-callback */
-import { AttributeValue, DeleteItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { AttributeValue, BatchWriteItemCommand, DeleteItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { DynamoCore, IDynamoRepository } from './core';
 import { stores } from '../../utils';
 import { awaiter, ProgressBar } from '../../services';
@@ -37,24 +37,32 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
     }
   }
 
-  async deleteRecord(pk: string, sk: string, retries = 0): Promise<boolean> {
+  async deleteRecords(items: { pk: string, sk: string }[], retries = 0): Promise<boolean> {
     try {
-      const params = {
-        TableName: this.table,
-        Key: {
-          pk: { S: pk },
-          sk: { S: sk }
+      const deleteRequests = items.map((item) => ({
+        DeleteRequest: {
+          Key: {
+            pk: { S: item.pk },
+            sk: { S: item.sk }
+          }
         }
-      }
+      }));
 
-      await this.client.send(new DeleteItemCommand(params));
+      const params = {
+        RequestItems: {
+          [this.table]: deleteRequests
+        }
+      };
+
+      await this.client.send(new BatchWriteItemCommand(params));
+
       return true;
-    } catch (error) {
-      if (error.message.includes('exceeded')) {
-        await awaiter(retries * 20 * 1000);
-        return this.deleteRecord(pk, sk, retries + 1);
+    } catch (error: any) {
+      if (error.message?.includes("exceeded")) {
+        await new Promise(resolve => setTimeout(resolve, retries * 2000));
+        return this.deleteRecords(items, retries + 1);
       }
-      console.error('Error al eliminar registros:', error);
+      console.error("Error al borrar registros en batch:", error);
       throw error;
     }
   }

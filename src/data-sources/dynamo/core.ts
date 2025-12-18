@@ -37,5 +37,5 @@ export class DynamoCore {
 
 export interface IDynamoRepository {
   getRecords(pk: string): Promise<Record<string, AttributeValue>[]>;
-  deleteRecord(pk: string, sk: string): Promise<boolean>;
+  deleteRecords(items: {pk: string, sk: string }[]): Promise<boolean>;
 }
