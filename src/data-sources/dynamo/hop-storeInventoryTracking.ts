@@ -13,21 +13,37 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
 
   async getRecords(store: string, retries = 0): Promise<Record<string, AttributeValue>[]> {
     try {
-      const params = {
-        TableName: this.table,
-        IndexName: this.indexName,
-        KeyConditionExpression: "gs1pk = :store AND gs1sk <= :fecha ",
-        ExpressionAttributeValues: {
-          ":store": { S: 'STORE#' + this.franchise + store },
-          ":fecha": { S: 'AT#' + '2024-31-12' }
-        },
-      };
+      let allItems: Record<string, AttributeValue>[] = [];
+      let lastEvaluatedKey: Record<string, AttributeValue> | undefined = undefined;
+      let iterationCount = 0;
 
-      const response = await this.client.send(new QueryCommand(params));
+      do {
+        const params = {
+          TableName: this.table,
+          IndexName: this.indexName,
+          KeyConditionExpression: "gs1pk = :store AND gs1sk <= :fecha",
+          ExpressionAttributeValues: {
+            ":store": { S: 'STORE#' + this.franchise + store },
+            ":fecha": { S: 'AT#' + '2024-31-12' }
+          },
+          ExclusiveStartKey: lastEvaluatedKey
+        };
 
-      return response.Items ?? [];
-    } catch (error) {
-      if (error.message.includes('exceeded')) {
+        const response = await this.client.send(new QueryCommand(params));
+
+        if (response.Items) {
+          allItems = allItems.concat(response.Items);
+        }
+
+        lastEvaluatedKey = response.LastEvaluatedKey;
+        iterationCount++;
+
+      } while (lastEvaluatedKey && iterationCount < 20);
+
+      return allItems;
+
+    } catch (error: any) {
+      if (error.message?.includes('exceeded')) {
         await awaiter(retries * 20 * 1000);
         return this.getRecords(store, retries + 1);
       }
@@ -36,6 +52,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
       throw error;
     }
   }
+
 
   async deleteRecords(items: { pk: string, sk: string }[], retries = 0): Promise<boolean> {
     try {

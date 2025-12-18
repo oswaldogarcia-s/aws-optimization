@@ -10,20 +10,36 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
   async getRecords(gspk: string, retries = 0): Promise<Record<string, AttributeValue>[]> {
     try {
       const date = gspk;
-      const params = {
-        TableName: this.table,
-        IndexName: this.indexName,
-        KeyConditionExpression: "gs2pk = :fecha", // Solo Partition Key
-        ExpressionAttributeValues: {
-          ":fecha": { S: date }
-        },
-      };
+      let allItems: Record<string, AttributeValue>[] = [];
+      let lastEvaluatedKey: Record<string, AttributeValue> | undefined = undefined;
+      let iterationCount = 0;
 
-      const response = await this.client.send(new QueryCommand(params));
+      do {
+        const params = {
+          TableName: this.table,
+          IndexName: this.indexName,
+          KeyConditionExpression: "gs2pk = :fecha",
+          ExpressionAttributeValues: {
+            ":fecha": { S: date }
+          },
+          ExclusiveStartKey: lastEvaluatedKey
+        };
 
-      return response.Items ?? [];
-    } catch (error) {
-      if (error.message.includes('exceeded')) {
+        const response = await this.client.send(new QueryCommand(params));
+
+        if (response.Items) {
+          allItems = allItems.concat(response.Items);
+        }
+
+        lastEvaluatedKey = response.LastEvaluatedKey;
+        iterationCount++;
+
+      } while (lastEvaluatedKey && iterationCount < 20);
+
+      return allItems;
+
+    } catch (error: any) {
+      if (error.message?.includes('exceeded')) {
         await new Promise(resolve => setTimeout(resolve, retries * 20 * 1000));
         return this.getRecords(gspk, retries + 1);
       }
@@ -32,7 +48,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
     }
   }
 
-  async deleteRecords(items: {pk: string, sk: string }[], retries = 0): Promise<boolean> {
+  async deleteRecords(items: { pk: string, sk: string }[], retries = 0): Promise<boolean> {
     try {
       const deleteRequests = items.map((item) => ({
         DeleteRequest: {
