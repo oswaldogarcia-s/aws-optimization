@@ -7,6 +7,8 @@
     "cognito-disable-users": "env-cmd -f ./config/env.json node dist/handlers/cognito/disable-users.js",
     "cognito-list-users": "env-cmd -f ./config/env.json node dist/handlers/cognito/list-users.js",
     "cognito-enable-users": "env-cmd -f ./config/env.json node dist/handlers/cognito/enable-users.js",
+    "delete-orders": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-orders.js",
+    "delete-inventory-tracking": "env-cmd -f ./config/env.json nonode dist/handlers/dynamo/delete-inventory-tracking.js",
 
 
     "dev:cognito-enable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/enable-users.ts",
