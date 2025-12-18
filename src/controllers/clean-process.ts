@@ -130,6 +130,8 @@ export default class HopOrdersTable {
       await this.deleteRecords();
 
       if (this.records.length < 1) {
+        console.log('Esperando 2 segundos para volver a traer mas registros');
+        awaiter(1000 * 2);
         await this.deleteOrders();
       }
 
@@ -155,6 +157,8 @@ export default class HopOrdersTable {
       await this.deleteRecords();
 
       if (this.records.length < 1) {
+        console.log('Esperando 2 segundos para volver a traer mas registros');
+        awaiter(1000 * 2);
         await this.deleteInventoryTracking();
       }
 
