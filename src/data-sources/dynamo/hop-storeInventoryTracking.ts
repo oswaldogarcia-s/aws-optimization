@@ -26,6 +26,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
             ":store": { S: 'STORE#' + this.franchise + store },
             ":fecha": { S: 'AT#' + '2024-31-12' }
           },
+          ProjectionExpression: "pk, sk",
           ExclusiveStartKey: lastEvaluatedKey
         };
 

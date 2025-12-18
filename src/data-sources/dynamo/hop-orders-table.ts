@@ -22,6 +22,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
           ExpressionAttributeValues: {
             ":fecha": { S: date }
           },
+          ProjectionExpression: "pk, sk",
           ExclusiveStartKey: lastEvaluatedKey
         };
 
