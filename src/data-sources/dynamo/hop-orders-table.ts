@@ -32,7 +32,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
     }
   }
 
-  async deleteRecord(pk: string, sk: string): Promise<boolean> {
+  async deleteRecord(pk: string, sk: string, retries = 0): Promise<boolean> {
     try {
       const params = {
         TableName: this.table,
@@ -45,6 +45,10 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
       await this.client.send(new DeleteItemCommand(params));
       return true;
     } catch (error) {
+      if (error.message.includes('exceeded')) {
+        await new Promise(resolve => setTimeout(resolve, retries * 20 * 1000));
+        return this.deleteRecord(pk, sk, retries + 1);
+      }
       console.error('Error al obtener registros:', error);
       throw error;
     }
