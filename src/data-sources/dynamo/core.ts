@@ -20,6 +20,8 @@ export class DynamoCore {
 
     const dynamodbConfig = {
       region: process.env.AWS_REGION,
+      retryMode: 'adaptive',
+      maxAttempts: 1,
     } as DynamoDBClientConfig;
 
     if (profileType === 'sso') {

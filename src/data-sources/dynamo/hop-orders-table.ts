@@ -35,7 +35,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
         lastEvaluatedKey = response.LastEvaluatedKey;
         iterationCount++;
 
-      } while (lastEvaluatedKey && iterationCount < 10);
+      } while (lastEvaluatedKey && iterationCount < 25);
 
       return allItems;
 
