@@ -10,6 +10,9 @@ import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { fromSSO } from '@aws-sdk/credential-provider-sso';
 import { ProgressBar } from '../../services';
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default class CognitoClient {
   private client: CognitoIdentityProviderClient;
@@ -92,6 +95,7 @@ export default class CognitoClient {
           Username: user
         });
         await this.client.send(command);
+        await sleep(5000);
         current += 1;
         this.progressBar.update(current);
       }
@@ -114,6 +118,7 @@ export default class CognitoClient {
           Username: user
         });
         await this.client.send(command);
+        await sleep(5000);
         current += 1;
         this.progressBar.update(current);
       }
