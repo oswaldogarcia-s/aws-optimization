@@ -1,7 +1,9 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
+import { Parser } from 'json2csv';
 import { CognitoClient } from "../data-sources";
+
 
 export default class CognitoAdmin {
   private cognitoClient: CognitoClient;
@@ -52,7 +54,9 @@ export default class CognitoAdmin {
 
       const cognitoUsers = await this.cognitoClient.getUsers(users);
 
-      console.log('cognitoUsers: ',this.mappingResponse(cognitoUsers));
+      const mapping =  this.mappingResponse(cognitoUsers);
+
+      this.jsonToCsvConsole(mapping);
     } catch (error) {
       console.error('Error to list users: ', error);
       throw error;
@@ -102,4 +106,15 @@ export default class CognitoAdmin {
       throw error;
     }
   }
+
+  jsonToCsvConsole<T>(data: T[]): void {
+    try {
+      const parser = new Parser();
+      const csv = parser.parse(data);
+      console.log(csv);
+    } catch (error) {
+      console.error('Error al convertir JSON a CSV:', error);
+    }
+  }
+
 }
