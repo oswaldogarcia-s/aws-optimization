@@ -9,12 +9,14 @@
     "cognito-enable-users": "env-cmd -f ./config/env.json node dist/handlers/cognito/enable-users.js",
     "delete-orders": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-orders.js",
     "delete-inventory-tracking": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-inventory-tracking.js",
+    "disable-club-modelorama": "env-cmd -f ./config/env.json node dist/handlers/rds-admin/disable-club-modelorama.js",
     "dev:cognito-enable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/enable-users.ts",
     "dev:cognito-list-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/list-users.ts",
     "dev:cognito-disable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/disable-users.ts",
     "dev:delete-orders": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-orders.ts",
     "dev:delete-inventory-tracking": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-inventory-tracking.ts",
     "dev:remoove-logs": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/git/remove-logs.ts",
+    "dev:disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/disable-club-modelorama.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -38,7 +40,9 @@
     "@aws-sdk/util-dynamodb": "^3.943.0",
     "csv-parser": "^3.2.0",
     "json2csv": "^6.0.0-alpha.2",
+    "knex": "^3.1.0",
     "lowdb": "^7.0.1",
+    "mysql2": "^3.16.0",
     "simple-git": "^3.30.0",
     "yaml": "^2.8.2"
   }
