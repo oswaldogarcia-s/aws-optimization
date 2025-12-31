@@ -10,6 +10,7 @@
     "delete-orders": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-orders.js",
     "delete-inventory-tracking": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-inventory-tracking.js",
     "disable-club-modelorama": "env-cmd -f ./config/env.json node dist/handlers/rds-admin/disable-club-modelorama.js",
+    "rollback-disable-club-modelorama": "env-cmd -f ./config/env.json node dist/handlers/rds-admin/rollback-disable-club-modelorama.js",
     "dev:cognito-enable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/enable-users.ts",
     "dev:cognito-list-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/list-users.ts",
     "dev:cognito-disable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/disable-users.ts",
@@ -17,6 +18,7 @@
     "dev:delete-inventory-tracking": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-inventory-tracking.ts",
     "dev:remoove-logs": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/git/remove-logs.ts",
     "dev:disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/disable-club-modelorama.ts",
+    "dev:rollback-disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/rollback-disable-club-modelorama.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },

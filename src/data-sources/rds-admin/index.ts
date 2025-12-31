@@ -55,6 +55,27 @@ export default class RdsAdmin {
     }
   }
 
+  async rollBackDisableClubModelorama(){
+    try {
+      await this.ensureDB();
+
+      const query = this.db.raw(`
+        UPDATE
+          hopadmindb.PaymentAffiliation
+        set StatusID = 0, PrevStatus = 1, LastUpdatedAt = now(), LastUpdatedBy = 'off'
+        WHERE
+          PaymentProviderID = 4
+          AND StatusID = 0
+          AND LastUpdatedBy = 'off';
+      `);
+
+      await query;
+    } catch (error) {
+      console.error('rollBackDisableClubModelorama error: ', error);
+      throw error;
+    }
+  }
+
   closeConnection(): void {
     if (this.db) {
       this.db.destroy();
