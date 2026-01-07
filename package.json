@@ -9,6 +9,7 @@
     "cognito-enable-users": "env-cmd -f ./config/env.json node dist/handlers/cognito/enable-users.js",
     "delete-orders": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-orders.js",
     "delete-inventory-tracking": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-inventory-tracking.js",
+    "delete-store-product": "env-cmd -f ./config/env.json node dist/handlers/dynamo/delete-storee-product.js",
     "disable-club-modelorama": "env-cmd -f ./config/env.json node dist/handlers/rds-admin/disable-club-modelorama.js",
     "rollback-disable-club-modelorama": "env-cmd -f ./config/env.json node dist/handlers/rds-admin/rollback-disable-club-modelorama.js",
     "dev:cognito-enable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/enable-users.ts",
