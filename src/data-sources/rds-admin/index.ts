@@ -42,7 +42,7 @@ export default class RdsAdmin {
       const query = this.db.raw(`
         UPDATE
           hopadmindb.PaymentAffiliation
-        set StatusID = 1, PrevStatus = 0, LastUpdatedAt = now(), LastUpdatedBy = 'off'
+        set StatusID = 0, PrevStatus = 1, LastUpdatedAt = now(), LastUpdatedBy = 'off'
         WHERE
           PaymentProviderID = 4
           AND StatusID = 1;
@@ -62,7 +62,7 @@ export default class RdsAdmin {
       const query = this.db.raw(`
         UPDATE
           hopadmindb.PaymentAffiliation
-        set StatusID = 0, PrevStatus = 1, LastUpdatedAt = now(), LastUpdatedBy = 'off'
+        set StatusID = 1, PrevStatus = 0, LastUpdatedAt = now(), LastUpdatedBy = 'off'
         WHERE
           PaymentProviderID = 4
           AND StatusID = 0
