@@ -5,8 +5,9 @@ import { stores } from '../../utils';
 
 type Data = {
   orders: { lastDeleteDate: string },
-  inventoryTracking: { lastStoreIndex: -1, lastStore: string },
-  loyaltyTransactions: { lastStoreIndex: -1, lastStore: string }
+  inventoryTracking: { lastStoreIndex: 0, lastStore: string },
+  loyaltyTransactions: { lastStoreIndex: 0, lastStore: string },
+  storeProduct: { lastStoreIndex: 0, lastStore: string },
 }
 
 export default class LowDb {
@@ -18,8 +19,9 @@ export default class LowDb {
 
   private defaultData: Data = {
     orders: { lastDeleteDate: this.cutoffDate.toISOString() },
-    inventoryTracking: { lastStoreIndex: -1, lastStore: '' },
-    loyaltyTransactions: { lastStoreIndex: -1, lastStore: '' }
+    inventoryTracking: { lastStoreIndex: 0, lastStore: '' },
+    loyaltyTransactions: { lastStoreIndex: 0, lastStore: '' },
+    storeProduct: { lastStoreIndex: 0, lastStore: '' }
   }
 
   private db = new Low(this.adapter, this.defaultData)
@@ -60,7 +62,7 @@ export default class LowDb {
   async getLastStoreIndex(dbName: string): Promise<{index: number, store: string}> {
     try {
       await this.db.read();
-      const index = this.db.data[dbName]?.lastStoreIndex ?? -1;
+      const index = this.db.data[dbName]?.lastStoreIndex ?? 0;
       const store = stores[index];
       if(store === undefined){
         console.log('No hay más tiendas para procesar');

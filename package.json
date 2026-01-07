@@ -16,6 +16,7 @@
     "dev:cognito-disable-users": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/cognito/disable-users.ts",
     "dev:delete-orders": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-orders.ts",
     "dev:delete-inventory-tracking": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-inventory-tracking.ts",
+    "dev:delete-store-product": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/dynamo/delete-storee-product",
     "dev:remoove-logs": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/git/remove-logs.ts",
     "dev:disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/disable-club-modelorama.ts",
     "dev:rollback-disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/rollback-disable-club-modelorama.ts",

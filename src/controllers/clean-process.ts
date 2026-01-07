@@ -1,5 +1,5 @@
 import { AttributeValue } from "@aws-sdk/client-dynamodb";
-import { DynamoInventoryTracking, DynamoOrders, IDynamoRepository, LowDb } from "../data-sources";
+import { DynamoInventoryTracking, DynamoOrders, IDynamoRepository, LowDb, DynamoStoreProduct } from "../data-sources";
 import { awaiter, ProgressBar } from "../services";
 
 export default class HopOrdersTable {
@@ -46,6 +46,7 @@ export default class HopOrdersTable {
     }
   }
 
+
   private async deleteRecords() {
     console.log('\n');
 
@@ -53,7 +54,7 @@ export default class HopOrdersTable {
       console.log('Borrando registros para la fecha: ', this.lastDeleteDate);
     }
     if (this.lastStore) {
-      console.log('Borrando registros anteriores a la fecha 2024-31-12 para la tienda: ', this.lastStore);
+      console.log('Borrando registros de la tienda: ', this.lastStore);
     }
 
     console.log('Registros por eliminar: ', this.records.length);
@@ -160,6 +161,33 @@ export default class HopOrdersTable {
         console.log('Esperando 2 segundos para volver a traer mas registros');
         awaiter(1000 * 2);
         await this.deleteInventoryTracking();
+      }
+
+    } catch (error) {
+      console.error('Error process:', error);
+      throw error;
+    }
+  }
+
+  async deleteStoreProduct() {
+    this.dynamoClient = new DynamoStoreProduct();
+    this.lowDBPath = 'storeProduct';
+    this.lowDB = new LowDb();
+    try {
+      if (!this.lastStore) {
+        await this.getLastStore();
+      }
+
+      if (this.records.length < 1) {
+        await this.getRecordsFromStore();
+      }
+
+      await this.deleteRecords();
+
+      if (this.records.length < 1) {
+        console.log('Esperando 2 segundos para volver a traer mas registros');
+        awaiter(1000 * 2);
+        await this.deleteStoreProduct();
       }
 
     } catch (error) {
