@@ -65,7 +65,7 @@ export default class HopOrdersTable {
     this.progressBar = new ProgressBar(this.records.length);
 
     let x = 0;
-    const batchSize = 20 * 25; // cantidad por segundo
+    const batchSize = 2 * 25; // cantidad por segundo
 
     while (this.records.length > 0) {
       // Tomar un lote de hasta 50 registros

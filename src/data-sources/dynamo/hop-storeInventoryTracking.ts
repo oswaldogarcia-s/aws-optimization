@@ -24,7 +24,7 @@ export default class DynamoHopOrders extends DynamoCore implements IDynamoReposi
           KeyConditionExpression: "gs1pk = :store AND gs1sk <= :fecha",
           ExpressionAttributeValues: {
             ":store": { S: 'STORE#' + this.franchise + store },
-            ":fecha": { S: 'AT#' + '2024-31-12' }
+            ":fecha": { S: 'AT#' + '2025-31-12' }
           },
           ProjectionExpression: "pk, sk",
           ExclusiveStartKey: lastEvaluatedKey
