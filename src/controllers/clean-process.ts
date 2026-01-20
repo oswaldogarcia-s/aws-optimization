@@ -147,17 +147,6 @@ export default class HopOrdersTable {
   }
 
   async deleteInventoryTracking() {
-    const date = new Date();
-    const hour = date.getHours();
-    if(hour < parseInt(this.startHour) || hour > parseInt(this.endHour)){
-      console.log('No es hora de eliminar registros. Hora: ', hour);
-      console.log('Hora de inicio: ', this.startHour);
-      console.log('Hora de fin: ', this.endHour);
-      console.log('Esperando 1 hora para volver a eliminar registros');
-      await awaiter(1000 * 60 * 60);
-      await this.deleteStoreProduct();
-    }
-
     this.dynamoClient = new DynamoInventoryTracking();
     this.lowDBPath = 'inventoryTracking';
     this.lowDB = new LowDb();
@@ -185,17 +174,6 @@ export default class HopOrdersTable {
   }
 
   async deleteStoreProduct() {
-    const date = new Date();
-    const hour = date.getHours();
-    if(hour < parseInt(this.startHour) || hour > parseInt(this.endHour)){
-      console.log('No es hora de eliminar registros. Hora: ', hour);
-      console.log('Hora de inicio: ', this.startHour);
-      console.log('Hora de fin: ', this.endHour);
-      console.log('Esperando 1 hora para volver a eliminar registros');
-      await awaiter(1000 * 60 * 60);
-      await this.deleteStoreProduct();
-    }
-
     this.dynamoClient = new DynamoStoreProduct();
     this.lowDBPath = 'storeProduct';
     this.lowDB = new LowDb();
