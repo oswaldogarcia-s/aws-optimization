@@ -76,6 +76,27 @@ export default class RdsAdmin {
     }
   }
 
+  async getStoreActive(): Promise<{StoreID: string, Name: string}[]>{
+    try{
+      await this.ensureDB();
+
+      const query = this.db
+        .select(
+          'StoreID',
+          'Name'
+        )
+        .from('Store')
+        .where({StatusID: 1});
+
+      const response = await query;
+
+      return response as {StoreID: string, Name: string}[];
+    } catch (error) {
+      console.error('getStoresActive error: ', error);
+      throw error;
+    }
+  }
+
   closeConnection(): void {
     if (this.db) {
       this.db.destroy();

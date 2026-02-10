@@ -21,6 +21,7 @@
     "dev:remoove-logs": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/git/remove-logs.ts",
     "dev:disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/disable-club-modelorama.ts",
     "dev:rollback-disable-club-modelorama": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/rollback-disable-club-modelorama.ts",
+    "dev:scanntech": "env-cmd -f ./config/env.json nodemon --watch src --exec ts-node src/handlers/rds-admin/get-active-stores-with-scantech-id.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
